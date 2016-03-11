@@ -1,7 +1,7 @@
 require_relative '../tree_of_life'
 
 describe TreeOfLife do
-  let(:tree_of_life) { TreeOfLife.new('spec/fixtures/Life On Earth') }
+  let(:tree_of_life) { TreeOfLife.new('spec/fixtures/Life on Earth') }
 
   describe '#in_group' do
     subject(:in_group) { tree_of_life.in_group(phylum) }
@@ -9,7 +9,7 @@ describe TreeOfLife do
     context 'matching case' do
       let(:phylum) { 'Hexapoda' }
       specify do
-        expect(in_group.first[:name]).to eq 'Ground beetle'
+        expect(in_group).to include hash_including(name: 'Ground beetle')
       end
     end
 
