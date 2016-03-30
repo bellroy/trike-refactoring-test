@@ -1,0 +1,68 @@
+# Steps of Refactoring
+
+### Step 1 -- Making the Test suite to pass
+The first step of a proper refactoring is to build a solid set of tests so after each burst of refactoring ( Refactoring should be done in small Bursts, courtesy of the book Refactoring working effectively with legacy code from Martin Fowler) we can run the test suite like a litmus test to check if we broke anything.
+
+Fortunately we already have a good set of tests which is our specification of how the program should work. But it's not passing.
+
+So the first step is to find the missing piece so the tests suite passes. After doing a bit of tinkering around the codebase, I found some clue which clearly showed we are only interested in files with extension ```.life```. 
+
+The things that contributed to this decision are:
+
+1. [This commit](https://github.com/joycse06/trike-refactoring-test/commit/304c2a02c495b98eb42677d07ecefcd02ea5ae57)    
+2. running ```find spec/fixtures/Life\ on\ Earth -name '*.life' | wc -l``` returns 7 which is the same number of file with ```.life``` extension in the commit above.
+3. and finally this assertion [here](https://github.com/joycse06/trike-refactoring-test/blob/master/spec/tree_of_life_spec.rb#L25) proved that I should only be looking at files with extension ```.life```
+
+so the next logical step is to change the find command pattern to ```%x[find '#{path}' -name '*.life']``` which will just find the files with extension ```.life```
+
+And it made the tests passing. First step done. We are good to go ahead and start refacroring confidently now. :)
+
+[Step 1 Commit](https://github.com/joycse06/trike-refactoring-test/commit/b38db4abcb1ce119e4cfc579a71c53fa01c7f092)
+
+### Step 2 -- extracting some heper methods
+
+The Single ```TreeOfLife``` class is doing too much which is breaking the first of the ```SOLID``` prnciples a.k.a ```The Single Responsibility Principle``` which states that **a class should have one and only one reason to change**.
+
+From a quick look at the public interfaces of the ```TreeOfLife``` class we can see that all of them are validating the argument the same way which is duplication of the logic and can be a nightmare for future changes if **we want to validate the args using a different logic in future**.
+We are also doing a lots of ```case-insensitive``` string comparison which we can extract to a method.
+
+Checking if a string is empty or two are same are clearly not the responsibility of the ```TreeOfLife``` class, they call for a Helper class or even better a Module which can be ```Mixed-In``` into our current class. Lets do it.
+
+[Step 2 Commit](https://github.com/joycse06/trike-refactoring-test/commit/2fd284ef90e0c1895cd975211961b88dd38bee7e)
+
+
+### Step 3 --- Removal of the Switch case
+One feature of OOP is removal of making decisions( using ```switch cases``` or any other language constructs ) because they almost always calls for duplication. The proper way to remove it is to use ```polymorphism``` or ``` duck typing ``` and use a common public interface and trust other objects to just repsond to messages.
+
+We are making decisions based on the ```movement``` of species. We already have duplication which will only spread throught the program as we will be adding features in future. But the use case here is not complex enough to warrant a very big refactoring with polymorphism or duck typing so maybe using a ```hash``` for movement details to collec the detail strings for now is enough.
+
+So lets do that.
+
+[Step 3 Commit](https://github.com/joycse06/trike-refactoring-test/commit/eb7ee43d41bef51d57114c61da5b69e2dacdf122)
+
+### Step 4 -- Extracting more functinalities following SRP(Single Responsibility Principle)
+
+What the ```TreeOfLife``` class is now representing as ```files``` are actually ```lifeforms(species)``` and the class is actually doing a lot on instances of files which with the associated data make a good case for it's own class. Maybe a ```Species``` class.
+
+Let's extract the ```species``` related functionalities into their new home the ```Species``` class.
+
+While working on the ```Species``` class I felt that the ```searching specimen from path``` is a peice of functionality which should be extracted into it's own thing. Its none of ```TreeOfLife``` or ```Species``` classes responsibility. So I decided to extract it into a service( following ```Service Oriented Architecture``` ) so that can change or be extended without making a ripple affect which would trigger changes to other dependent classes.
+
+Finally refactored( renamed ) lots of variables in the whole project to make them **more intention revealing**.
+
+Finally moved all of them into their own files so we have short clean classes in each files which are much more readable.
+
+Thats it for now.
+
+[Step 4 Commit](https://github.com/joycse06/trike-refactoring-test/commit/ca37f439d8eb24af9b7e83c37a4e11a2a250745d)
+
+### Further Refactoring plans
+
+1. I would love the ```TreeOfLife``` class not depend on the ```SpeciesFinderService``` directly. It creats a class name dependency while all it requires is a object which can respond to the ```find_species_from_path``` message. ```Dependency Injection``` would be the way to go, but I didn't want to modify the ```Public interface``` of ```TreeOfLife``` class, otherwise I could just inject the service as an argument.
+2. The ```SpeciesFinderService``` is now also creating instances of ```Species``` class while it's responsibility should be focused on how to discover species from the directory structure or from other sources in future. Maybe a ```SpeciesFactory``` ( ```Factory Pattern``` ) could be used to generate all the species ```Instances``` from raw data served by the service.
+
+But maybe it's fine to live with these for now and not overengineer the design.
+
+
+
+
