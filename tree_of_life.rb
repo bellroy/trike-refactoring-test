@@ -2,7 +2,7 @@ require 'pathname'
 
 class TreeOfLife
   def initialize(path)
-    self.files = %x[find '#{path}' -name '*.*'].split("\n")
+    self.files = %x[find '#{path}' -name '*.life'].split("\n")
   end
 
   def in_group(group)
