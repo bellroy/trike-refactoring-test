@@ -1,24 +1,36 @@
 require 'pathname'
 
+module Helper
+  def empty?(str)
+    # nil, empty or just whitespace
+    str.to_s.strip.length == 0
+  end
+
+  def case_insensitive_equal?(str1, str2)
+    str1.downcase == str2.downcase
+  end
+end
+
 class TreeOfLife
+  include Helper
   def initialize(path)
     self.files = %x[find '#{path}' -name '*.life'].split("\n")
   end
 
   def in_group(group)
-    return [] if group.nil? || group == ''
+    return [] unless valid?(group)
     matching_files = files.select{ |file| file.downcase.split('/').include?(group.downcase) }
     matching_files.map{|file| file_to_hash(file)}
   end
 
   def all_that_eat(food)
-    return [] if food.nil? || food == ''
-    files.map{|file| file_to_hash(file)}.select{|hash| hash[:eats].downcase == food.downcase}
+    return [] unless valid?(food)
+    files.map{|file| file_to_hash(file)}.select{|hash| case_insensitive_equal?( hash[:eats], food )}
   end
 
   def exercise_those_that(move)
-    return '' if move.nil? || move == ''
-    matching_hashes = files.map{|file| file_to_hash(file)}.select{|hash| hash[:move].downcase == move.downcase}
+    return '' unless valid?(move)
+    matching_hashes = files.map{|file| file_to_hash(file)}.select{ |hash| case_insensitive_equal?( hash[:move] , move )}
     case move.downcase
     when 'fly'
       headline = 'Look in the sky!'
@@ -36,8 +48,8 @@ class TreeOfLife
   end
 
   def describe(species)
-    return '' if species.nil? || species == ''
-    match = files.map{|file| file_to_hash(file)}.find{|hash| hash[:species].downcase == species.downcase}
+    return '' unless valid?(species)
+    match = files.map{|file| file_to_hash(file)}.find{ |hash| case_insensitive_equal?( hash[:species] , species ) }
     if match.nil?
       "The species #{species} does not exist"
     else
@@ -57,6 +69,13 @@ class TreeOfLife
   private
 
   attr_accessor :files
+
+  def valid?(arg)
+    # our only check for a valid arguments to our public interfaces is if the argument string is not empty
+    # but it's better to keep it self contained, so we only have a single place to change this
+    # in future if need be
+    !empty?(arg)
+  end
 
   def file_to_hash(file)
     contents = File.read(file).split("\n")
