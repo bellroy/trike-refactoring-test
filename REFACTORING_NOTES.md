@@ -27,4 +27,13 @@ We are also doing a lots of ```case-insensitive``` string comparison which we ca
 Checking if a string is empty or two are same are clearly not the responsibility of the ```TreeOfLife``` class, they call for a Helper class or even better a Module which can be ```Mixed-In``` into our current class. Lets do it.
 
 
+### Step 3 --- Removal of the Switch case
+One feature of OOP is removal of making decisions( using ```switch cases``` or any other language constructs ) because they almost always calls for duplication. The proper way to remove it is to use ```polymorphism``` or ``` duck typing ``` and use a common public interface and trust other objects to just repsond to messages.
+
+We are making decisions based on the ```movement``` of species. We already have duplication which will only spread throught the program as we will be adding features in future. But the use case here is not complex enough to warrant a very big refactoring with polymorphism or duck typing so maybe using a ```hash``` for movement details to collec the detail strings for now is enough.
+
+So lets do that.
+
+
+
 

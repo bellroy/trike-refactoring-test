@@ -31,19 +31,8 @@ class TreeOfLife
   def exercise_those_that(move)
     return '' unless valid?(move)
     matching_hashes = files.map{|file| file_to_hash(file)}.select{ |hash| case_insensitive_equal?( hash[:move] , move )}
-    case move.downcase
-    when 'fly'
-      headline = 'Look in the sky!'
-      action = 'flies'
-    when 'scuttle'
-      headline = 'Look on the ground!'
-      action = 'scuttles'
-    when 'swim'
-      headline = 'Look in the water!'
-      action = 'swims'
-    else
-      headline = "There are no life forms that #{move}"
-    end
+    headline = headline_for_move(move)
+    action   = action_for_move(move)
     "#{headline}\n#{matching_hashes.map{|hash| 'The ' + hash[:name] + ' ' + action}.join("\n")}"
   end
 
@@ -53,14 +42,7 @@ class TreeOfLife
     if match.nil?
       "The species #{species} does not exist"
     else
-      case match[:move].downcase
-      when 'fly'
-        action = 'flies'
-      when 'scuttle'
-        action = 'scuttles'
-      when 'swim'
-        action = 'swims'
-      end
+      action = action_for_move(match[:move])
       "The #{match[:name]} (#{match[:species]}) eats #{match[:eats].downcase}" \
         " and #{action}"
     end
@@ -69,6 +51,22 @@ class TreeOfLife
   private
 
   attr_accessor :files
+
+  MOVEMENT_DETAILS = {
+      'fly'       => { headline: 'Look in the sky!',    action: 'flies' },
+      'scuttle'   => { headline: 'Look on the ground!', action: 'scuttles' },
+      'swim'      => { headline: 'Look in the water!',  action: 'swims' }
+  }
+
+  def headline_for_move(move)
+    return MOVEMENT_DETAILS[move.downcase][:headline] unless MOVEMENT_DETAILS[move.downcase].nil?
+    "There are no life forms that #{move}"
+  end
+
+  # it returns nil if an action for the move is not found
+  def action_for_move(move)
+    return MOVEMENT_DETAILS[move.downcase][:action] unless MOVEMENT_DETAILS[move.downcase].nil?
+  end
 
   def valid?(arg)
     # our only check for a valid arguments to our public interfaces is if the argument string is not empty
