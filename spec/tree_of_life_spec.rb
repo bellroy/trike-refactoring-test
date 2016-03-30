@@ -1,7 +1,10 @@
 require_relative '../tree_of_life'
 
 describe TreeOfLife do
-  let(:tree_of_life) { TreeOfLife.new('spec/fixtures/Life On Earth') }
+  # changed the folder name in path from `Life On Earth` to `Life on Earth`
+  # it was working fine on my machine( OSX ) which has a case-insensitive file system
+  # but could break on any case-sensitive file system
+  let(:tree_of_life) { TreeOfLife.new('spec/fixtures/Life on Earth') }
 
   describe '#in_group' do
     subject(:in_group) { tree_of_life.in_group(phylum) }

@@ -34,6 +34,19 @@ We are making decisions based on the ```movement``` of species. We already have 
 
 So lets do that.
 
+### Step 4 -- Extracting more functinalities following SRP(Single Responsibility Principle)
+
+What the ```TreeOfLife``` class is now representing as ```files``` are actually ```lifeforms(species)``` and the class is actually doing a lot on instances of files which with the associated data make a good case for it's own class. Maybe a ```Species``` class.
+
+Let's extract the ```species``` related functionalities into their new home the ```Species``` class.
+
+While working on the ```Species``` class I felt that the ```searching specimen from path``` is a peice of functionality which should be extracted into it's own thing. Its none of ```TreeOfLife``` or ```Species``` classes responsibility. So I decided to extract it into a service( following ```Service Oriented Architecture``` ) so that can change or be extended without making a ripple affect which would trigger changes to other dependent classes.
+
+Finally refactored( renamed ) lots of variables in the whole project to make them **more intention revealing**.
+
+Finally moved all of them into their own files so we have short clean classes in each files which are much more readable.
+
+Thats it for now.
 
 
 
